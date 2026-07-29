@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Resume Ranking</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            background:#f4f4f4;
+            padding:40px;
+        }
+
+        h1{
+            text-align:center;
+            color: #2c3e50;
+        }
+
+        table{
+            width:80%;
+            border-collapse:collapse;
+            margin-top: 30px;
+            background:white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+         th {
+        background: #2563eb;
+        color: white;
+        padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:hover {
+        background: #f5f5f5;
+        }
+
+        .download-btn {
+            display: block;
+            width: 220px;
+            margin: 30px auto;
+            padding: 12px;
+            background: #16a34a;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .download-btn:hover {
+            background: #15803d;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #2563eb;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            line-height: 20px;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>Resume Ranking Results</h1>
+
+<table>
+
+<tr>
+    <th>Rank</th>
+    <th>Resume</th>
+    <th>Match Score</th>
+    <th>ATS Score</th>
+    <th>Recommendation</th>
+    <th>Matched Skills</th>
+    <th>Missing Skills</th>
+</tr>
+
+{% for ranked_resume in ranked_resumes %}
+
+<tr>
+
+    <td>{{ loop.index }}</td>
+
+    <td>{{ ranked_resume.filename }}</td>
+
+    <td>
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {{ ranked_resume.score }}%;">
+            {{ ranked_resume.score }}%
+        </div>
+    </div>  
+    </td>
+
+    <td>
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {{ ranked_resume.ats_score }}%;">
+            {{ ranked_resume.ats_score }}%
+        </div>
+    </div>
+    </td>
+
+    <td>{{ ranked_resume.recommendation }}</td>
+
+    <td>
+        {% if ranked_resume.matched %}
+            <ul style="text-align:left;">
+            {% for skill in ranked_resume.matched %}
+                <li style="color:green;">{{ skill }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <span style="color:red;">No Skills Matched</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if ranked_resume.missing %}
+            <ul style="text-align:left;">
+            {% for skill in ranked_resume.missing %}
+                <li style="color:red;">{{ skill }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <span style="color:green;">None</span>
+        {% endif %}
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br><br>
+
+<a href="/download-csv" class="download-btn">
+    📥 Download CSV Report
+</a>
+
+</body>
+
+</html>
