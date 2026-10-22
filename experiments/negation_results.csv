@@ -1,0 +1,10 @@
+Test,Matcher,Target Skill,False Positive
+Negated Java,Original,java,True
+Negated Java,Boundary-aware,java,True
+Negated Java,Negation-aware,java,False
+Negated Python,Original,python,True
+Negated Python,Boundary-aware,python,True
+Negated Python,Negation-aware,python,False
+Negated C,Original,c,True
+Negated C,Boundary-aware,c,True
+Negated C,Negation-aware,c,False
