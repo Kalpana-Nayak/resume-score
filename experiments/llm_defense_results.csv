@@ -1,0 +1,6 @@
+Trial,Baseline Normal,Baseline Injected,Baseline Difference,Defense Normal,Defense Injected,Defense Difference
+1,75,100,25,80,100,20
+2,80,100,20,70,100,30
+3,80,100,20,60,100,40
+4,80,100,20,70,100,30
+5,80,100,20,70,100,30

@@ -10,50 +10,90 @@ from negation_skill_matcher import find_skill_matches as negation_matcher
 SKILLS = ["python", "java", "c", "sql", "machine learning"]
 
 TEST_CASES = [
+    
     {
         "name": "Valid skills",
-        "resume": "I have Python, Java, C, SQL and machine learning experience."
+        "resume": "I have Python, Java, C, SQL and machine learning experience.",
+        "expected_skills": ["python", "java", "c", "sql", "machine learning"]
     },
     {
         "name": "Substring trap",
-        "resume": "I have experience in teamwork and communication."
+        "resume": "I have experience in teamwork and communication.",
+        "expected_skills": []
     },
+    
     {
         "name": "Negated Java",
-        "resume": "I have no experience with Java."
+        "resume": "I have no experience with Java.",
+        "expected_skills": []
     },
     {
         "name": "Negated Python",
-        "resume": "I have never used Python."
+        "resume": "I have never used Python.",
+        "expected_skills": []
     },
     {
         "name": "Negated C",
-        "resume": "I am not proficient in C."
+        "resume": "I am not proficient in C.",
+        "expected_skills": []
     },
     {
         "name": "Partial skills",
-        "resume": "I know Python and SQL."
+        "resume": "I know Python and SQL.",
+        "expected_skills": ["python", "sql"]
     },
     {
         "name": "Alternative negation",
-        "resume": "Java is not a skill I possess."
+        "resume": "Java is not a skill I possess.",
+        "expected_skills": []
     },
     {
         "name": "Lack of experience",
-        "resume": "I lack Python experience."
+        "resume": "I lack Python experience.",
+        "expected_skills": []
     },
     {
         "name": "Mixed positive and negative",
-        "resume": "I have experience with Java, but not Python."
+        "resume": "I have experience with Java, but not Python.",
+        "expected_skills": ["java"]
     },
     {
         "name": "Basic experience",
-        "resume": "I have basic Python experience."
+        "resume": "I have basic Python experience.",
+        "expected_skills": ["python"]
     },
     {
         "name": "Project experience",
-        "resume": "I used Python in a project."
+        "resume": "I used Python in a project.",
+        "expected_skills": ["python"]
+    },
+    
+    {
+        "name": "Repeated Python mention with negation",
+        "resume": "Python is useful. I have no experience with Python.",
+        "expected_skills": []
+    },
+    {
+        "name": "Alternative Java negation",
+        "resume": "I have never worked with Java.",
+        "expected_skills": []
+    },
+    {
+        "name": "Positive Python and negative Java",
+        "resume": "I know Python, but I lack Java experience.",
+        "expected_skills": ["python"]
+    },
+    {
+        "name": "Python mentioned in reading context",
+        "resume": "I enjoy reading about Python but have never used it.",
+        "expected_skills": []
+    },
+    {
+        "name": "Negative Java and positive Python",
+        "resume": "I have no Java experience, but I use Python in projects.",
+        "expected_skills": ["python"]
     }
+
 
 ]
 
@@ -217,6 +257,62 @@ def evaluate_positive_cases(matcher):
     return false_negatives, total_expected_skills
 
 
+def calculate_metrics(true_positives, false_positives, false_negatives):
+    if true_positives + false_positives == 0:
+        precision = 0
+    else:
+        precision = true_positives / (true_positives + false_positives)
+
+    if true_positives + false_negatives == 0:
+        recall = 0
+    else:
+        recall = true_positives / (true_positives + false_negatives)
+
+    if precision + recall == 0:
+        f1_score = 0
+    else:
+        f1_score = 2 * precision * recall / (precision + recall)
+
+    return precision, recall, f1_score
+
+
+def evaluate_matcher_metrics(matcher):
+    true_positives = 0
+    false_positives = 0
+    false_negatives = 0
+
+    for case in TEST_CASES:
+        resume = case["resume"]
+        expected = case["expected_skills"]
+
+        if matcher == original_matcher:
+            matched, missing = matcher(JOB_DESCRIPTION, resume)
+        else:
+            matched, missing = matcher(
+                JOB_DESCRIPTION, resume, SKILLS
+            )
+
+        expected_set = set(expected)
+        matched_set = set(matched)
+
+        true_positives += len(expected_set & matched_set)
+        false_positives += len(matched_set - expected_set)
+        false_negatives += len(expected_set - matched_set)
+
+    precision, recall, f1_score = calculate_metrics(
+        true_positives, false_positives, false_negatives
+    )
+
+    return (
+        true_positives,
+        false_positives,
+        false_negatives,
+        precision,
+        recall,
+        f1_score,
+    )
+
+
 
 if __name__ == "__main__":
     run_evaluation()
@@ -233,6 +329,25 @@ if __name__ == "__main__":
     ]:
         errors, total = evaluate_positive_cases(matcher)
         print(f"{name}: {errors} false negatives out of {total} expected skills")
+
+    
+    print("\nOVERALL MATCHER METRICS")
+
+    for name, matcher in [
+        ("Original", original_matcher),
+        ("Boundary-aware", boundary_matcher),
+        ("Negation-aware", negation_matcher),
+    ]:
+        tp, fp, fn, precision, recall, f1 = evaluate_matcher_metrics(matcher)
+
+        print(f"\n{name} Matcher")
+        print("True positives:", tp)
+        print("False positives:", fp)
+        print("False negatives:", fn)
+        print(f"Precision: {precision:.2%}")
+        print(f"Recall: {recall:.2%}")
+        print(f"F1-score: {f1:.2%}")
+
 
     save_negation_results()
 
